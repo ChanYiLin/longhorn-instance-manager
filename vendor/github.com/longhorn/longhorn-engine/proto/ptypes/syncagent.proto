@@ -94,6 +94,7 @@ message BackupCreateRequest {
   string compression_method = 9;
   int32 concurrent_limit = 10;
   string storage_class_name = 11;
+  map<string, string> options = 12;
 }
 
 message BackupCreateResponse {
@@ -122,6 +123,7 @@ message BackupRestoreRequest {
   string snapshot_disk_name = 2;
   map<string, string> credential = 3;
   int32 concurrent_limit = 4;
+  map<string, string> options = 5;
 }
 
 message BackupRestoreIncrementallyRequest {

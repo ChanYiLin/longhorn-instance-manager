@@ -58,6 +58,11 @@ func (p *Proxy) snapshotBackup(ctx context.Context, req *rpc.EngineSnapshotBacku
 		return nil, err
 	}
 
+	options, err := butil.GetBackupOptions(req.BackupTarget)
+	if err != nil {
+		return nil, err
+	}
+
 	labels := []string{}
 	for k, v := range req.Labels {
 		labels = append(labels, fmt.Sprintf("%s=%s", k, v))
@@ -80,6 +85,7 @@ func (p *Proxy) snapshotBackup(ctx context.Context, req *rpc.EngineSnapshotBacku
 		req.StorageClassName,
 		labels,
 		credential,
+		options,
 	)
 	if err != nil {
 		return nil, err
@@ -239,6 +245,11 @@ func (p *Proxy) backupRestore(ctx context.Context, req *rpc.EngineBackupRestoreR
 		return nil, err
 	}
 
+	options, err := butil.GetBackupOptions(req.Target)
+	if err != nil {
+		return nil, err
+	}
+
 	task, err := esync.NewTask(ctx, req.ProxyEngineRequest.Address, req.ProxyEngineRequest.VolumeName,
 		req.ProxyEngineRequest.EngineName)
 	if err != nil {
@@ -248,7 +259,7 @@ func (p *Proxy) backupRestore(ctx context.Context, req *rpc.EngineBackupRestoreR
 	resp = &rpc.EngineBackupRestoreProxyResponse{
 		TaskError: []byte{},
 	}
-	err = task.RestoreBackup(req.Url, credential, int(req.ConcurrentLimit))
+	err = task.RestoreBackup(req.Url, credential, int(req.ConcurrentLimit), options)
 	if err != nil {
 		errInfo, jsonErr := json.Marshal(err)
 		if jsonErr != nil {

@@ -42,7 +42,7 @@ type RestoreStatus struct {
 }
 
 func (t *Task) CreateBackup(backupName, snapshot, dest, backingImageName, backingImageChecksum string,
-	compressionMethod string, concurrentLimit int, storageClassName string, labels []string, credential map[string]string) (*BackupCreateInfo, error) {
+	compressionMethod string, concurrentLimit int, storageClassName string, labels []string, credential map[string]string, options map[string]string) (*BackupCreateInfo, error) {
 	if snapshot == types.VolumeHeadName {
 		return nil, fmt.Errorf("cannot backup the head disk in the chain")
 	}
@@ -58,7 +58,7 @@ func (t *Task) CreateBackup(backupName, snapshot, dest, backingImageName, backin
 	}
 
 	return t.createBackup(replica, backupName, snapshot, dest, volume.Name, backingImageName, backingImageChecksum,
-		compressionMethod, concurrentLimit, storageClassName, labels, credential)
+		compressionMethod, concurrentLimit, storageClassName, labels, credential, options)
 }
 
 func (t *Task) findRWReplica() (*types.ControllerReplicaInfo, error) {
@@ -78,7 +78,7 @@ func (t *Task) findRWReplica() (*types.ControllerReplicaInfo, error) {
 
 func (t *Task) createBackup(replicaInController *types.ControllerReplicaInfo, backupName, snapshot, dest, volumeName,
 	backingImageName, backingImageChecksum, compression string, concurrentLimit int, storageClassName string,
-	labels []string, credential map[string]string) (*BackupCreateInfo, error) {
+	labels []string, credential map[string]string, options map[string]string) (*BackupCreateInfo, error) {
 	if replicaInController.Mode != types.RW {
 		return nil, fmt.Errorf("can only create backup from replica in mode RW, got %s", replicaInController.Mode)
 	}
@@ -103,7 +103,7 @@ func (t *Task) createBackup(replicaInController *types.ControllerReplicaInfo, ba
 	logrus.Infof("Backing up %s on %s, to %s", snapshot, replicaInController.Address, dest)
 
 	reply, err := repClient.CreateBackup(backupName, snapshot, dest, volumeName, backingImageName, backingImageChecksum,
-		compression, concurrentLimit, storageClassName, labels, credential)
+		compression, concurrentLimit, storageClassName, labels, credential, options)
 	if err != nil {
 		return nil, err
 	}
@@ -132,7 +132,7 @@ func FetchBackupStatus(client *replicaClient.ReplicaClient, backupID string, rep
 	}, nil
 }
 
-func (t *Task) RestoreBackup(backup string, credential map[string]string, concurrentLimit int) error {
+func (t *Task) RestoreBackup(backup string, credential map[string]string, concurrentLimit int, options map[string]string) error {
 	volume, err := t.client.VolumeGet()
 	if err != nil {
 		return errors.Wrapf(err, "failed to get volume")
@@ -242,7 +242,7 @@ func (t *Task) RestoreBackup(backup string, credential map[string]string, concur
 	for _, r := range replicas {
 		go func(replica *types.ControllerReplicaInfo) {
 			defer wg.Done()
-			err := t.restoreBackup(replica, backup, snapshotDiskName, credential, concurrentLimit)
+			err := t.restoreBackup(replica, backup, snapshotDiskName, credential, concurrentLimit, options)
 			if err != nil {
 				syncErrorMap.Store(replica.Address, err)
 			}
@@ -264,7 +264,7 @@ func (t *Task) RestoreBackup(backup string, credential map[string]string, concur
 }
 
 func (t *Task) restoreBackup(replicaInController *types.ControllerReplicaInfo, backup string, snapshotFile string,
-	credential map[string]string, concurrentLimit int) error {
+	credential map[string]string, concurrentLimit int, options map[string]string) error {
 	if replicaInController.Mode == types.ERR {
 		return fmt.Errorf("cannot restore backup from replica in mode ERR")
 	}
@@ -276,7 +276,7 @@ func (t *Task) restoreBackup(replicaInController *types.ControllerReplicaInfo, b
 	}
 	defer repClient.Close()
 
-	if err := repClient.RestoreBackup(backup, snapshotFile, credential, concurrentLimit); err != nil {
+	if err := repClient.RestoreBackup(backup, snapshotFile, credential, concurrentLimit, options); err != nil {
 		return err
 	}
 
