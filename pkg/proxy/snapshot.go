@@ -69,6 +69,7 @@ func (ops V2DataEngineProxyOps) VolumeSnapshot(ctx context.Context, req *rpc.Eng
 	if err != nil {
 		return nil, grpcstatus.Errorf(grpccodes.Internal, "failed to create snapshot %v: %v", snapshotName, err)
 	}
+	logrus.Infof("[DEBUG] VolumeSnapshot: Created snapshot %v", snapshotName)
 	return &rpc.EngineVolumeSnapshotProxyResponse{
 		Snapshot: &enginerpc.VolumeSnapshotReply{
 			Name: snapshotName,
