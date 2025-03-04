@@ -4,6 +4,8 @@ go 1.23.0
 
 toolchain go1.23.5
 
+replace github.com/longhorn/types v0.0.0-20241225162202-00d3a5fd7502 => github.com/chanyilin/types v0.0.0-20250224083135-a81884f8f633
+
 require (
 	github.com/google/uuid v1.6.0
 	github.com/longhorn/backupstore v0.0.0-20250115162037-d046737d09dc

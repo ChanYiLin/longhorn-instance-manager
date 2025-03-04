@@ -115,3 +115,44 @@ func (c *ProxyClient) SPDKBackingImageWatch(ctx context.Context) (*api.BackingIm
 
 	return api.NewBackingImageStream(stream), nil
 }
+
+func (c *ProxyClient) SPDKBackingImageBackupCreate(ctx context.Context, backupName, name, uuid, lvsUUID, checksum, backupTarget string,
+	labels, credential map[string]string, compressionMethod string, concurrentLimit int, parameters map[string]string) error {
+
+	input := map[string]string{
+		"backup_name":   backupName,
+		"name":          name,
+		"uuid":          uuid,
+		"lvsUUID":       lvsUUID,
+		"checksum":      checksum,
+		"backup_target": backupTarget,
+	}
+
+	if err := validateProxyMethodParameters(input); err != nil {
+		return errors.Wrap(err, "failed to get backing image")
+	}
+
+	labelSlice := []string{}
+	for k, v := range labels {
+		labelSlice = append(labelSlice, fmt.Sprintf("%s=%s", k, v))
+	}
+
+	client := c.service
+	ctx, cancel := context.WithTimeout(context.Background(), types.GRPCServiceTimeout)
+	defer cancel()
+
+	_, err := client.SPDKBackingImageBackupCreate(ctx, &rpc.SPDKBackingImageBackupCreateRequest{
+		BackupName:        backupName,
+		Name:              name,
+		Uuid:              uuid,
+		LvsUuid:           lvsUUID,
+		Checksum:          checksum,
+		BackupTarget:      backupTarget,
+		Labels:            labelSlice,
+		Credential:        credential,
+		CompressionMethod: compressionMethod,
+		ConcurrentLimit:   int32(concurrentLimit),
+		Parameters:        parameters,
+	})
+	return err
+}

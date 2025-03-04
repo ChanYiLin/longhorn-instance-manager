@@ -55,6 +55,8 @@ const (
 	ProxyEngineService_SPDKBackingImageGet_FullMethodName                = "/imrpc.ProxyEngineService/SPDKBackingImageGet"
 	ProxyEngineService_SPDKBackingImageList_FullMethodName               = "/imrpc.ProxyEngineService/SPDKBackingImageList"
 	ProxyEngineService_SPDKBackingImageWatch_FullMethodName              = "/imrpc.ProxyEngineService/SPDKBackingImageWatch"
+	ProxyEngineService_SPDKBackingImageBackupCreate_FullMethodName       = "/imrpc.ProxyEngineService/SPDKBackingImageBackupCreate"
+	ProxyEngineService_SPDKBackingImageBackupStatus_FullMethodName       = "/imrpc.ProxyEngineService/SPDKBackingImageBackupStatus"
 	ProxyEngineService_MetricsGet_FullMethodName                         = "/imrpc.ProxyEngineService/MetricsGet"
 	ProxyEngineService_RemountReadOnlyVolume_FullMethodName              = "/imrpc.ProxyEngineService/RemountReadOnlyVolume"
 )
@@ -98,6 +100,8 @@ type ProxyEngineServiceClient interface {
 	SPDKBackingImageGet(ctx context.Context, in *SPDKBackingImageGetRequest, opts ...grpc.CallOption) (*SPDKBackingImageResponse, error)
 	SPDKBackingImageList(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*SPDKBackingImageListResponse, error)
 	SPDKBackingImageWatch(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (ProxyEngineService_SPDKBackingImageWatchClient, error)
+	SPDKBackingImageBackupCreate(ctx context.Context, in *SPDKBackingImageBackupCreateRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	SPDKBackingImageBackupStatus(ctx context.Context, in *SPDKBackingImageBackupStatusRequest, opts ...grpc.CallOption) (*SPDKBackingImageBackupStatusResponse, error)
 	MetricsGet(ctx context.Context, in *ProxyEngineRequest, opts ...grpc.CallOption) (*EngineMetricsGetProxyResponse, error)
 	RemountReadOnlyVolume(ctx context.Context, in *RemountVolumeRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
@@ -448,6 +452,24 @@ func (x *proxyEngineServiceSPDKBackingImageWatchClient) Recv() (*emptypb.Empty, 
 	return m, nil
 }
 
+func (c *proxyEngineServiceClient) SPDKBackingImageBackupCreate(ctx context.Context, in *SPDKBackingImageBackupCreateRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, ProxyEngineService_SPDKBackingImageBackupCreate_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *proxyEngineServiceClient) SPDKBackingImageBackupStatus(ctx context.Context, in *SPDKBackingImageBackupStatusRequest, opts ...grpc.CallOption) (*SPDKBackingImageBackupStatusResponse, error) {
+	out := new(SPDKBackingImageBackupStatusResponse)
+	err := c.cc.Invoke(ctx, ProxyEngineService_SPDKBackingImageBackupStatus_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *proxyEngineServiceClient) MetricsGet(ctx context.Context, in *ProxyEngineRequest, opts ...grpc.CallOption) (*EngineMetricsGetProxyResponse, error) {
 	out := new(EngineMetricsGetProxyResponse)
 	err := c.cc.Invoke(ctx, ProxyEngineService_MetricsGet_FullMethodName, in, out, opts...)
@@ -505,6 +527,8 @@ type ProxyEngineServiceServer interface {
 	SPDKBackingImageGet(context.Context, *SPDKBackingImageGetRequest) (*SPDKBackingImageResponse, error)
 	SPDKBackingImageList(context.Context, *emptypb.Empty) (*SPDKBackingImageListResponse, error)
 	SPDKBackingImageWatch(*emptypb.Empty, ProxyEngineService_SPDKBackingImageWatchServer) error
+	SPDKBackingImageBackupCreate(context.Context, *SPDKBackingImageBackupCreateRequest) (*emptypb.Empty, error)
+	SPDKBackingImageBackupStatus(context.Context, *SPDKBackingImageBackupStatusRequest) (*SPDKBackingImageBackupStatusResponse, error)
 	MetricsGet(context.Context, *ProxyEngineRequest) (*EngineMetricsGetProxyResponse, error)
 	RemountReadOnlyVolume(context.Context, *RemountVolumeRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedProxyEngineServiceServer()
@@ -618,6 +642,12 @@ func (UnimplementedProxyEngineServiceServer) SPDKBackingImageList(context.Contex
 }
 func (UnimplementedProxyEngineServiceServer) SPDKBackingImageWatch(*emptypb.Empty, ProxyEngineService_SPDKBackingImageWatchServer) error {
 	return status.Errorf(codes.Unimplemented, "method SPDKBackingImageWatch not implemented")
+}
+func (UnimplementedProxyEngineServiceServer) SPDKBackingImageBackupCreate(context.Context, *SPDKBackingImageBackupCreateRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SPDKBackingImageBackupCreate not implemented")
+}
+func (UnimplementedProxyEngineServiceServer) SPDKBackingImageBackupStatus(context.Context, *SPDKBackingImageBackupStatusRequest) (*SPDKBackingImageBackupStatusResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SPDKBackingImageBackupStatus not implemented")
 }
 func (UnimplementedProxyEngineServiceServer) MetricsGet(context.Context, *ProxyEngineRequest) (*EngineMetricsGetProxyResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method MetricsGet not implemented")
@@ -1271,6 +1301,42 @@ func (x *proxyEngineServiceSPDKBackingImageWatchServer) Send(m *emptypb.Empty) e
 	return x.ServerStream.SendMsg(m)
 }
 
+func _ProxyEngineService_SPDKBackingImageBackupCreate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SPDKBackingImageBackupCreateRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProxyEngineServiceServer).SPDKBackingImageBackupCreate(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ProxyEngineService_SPDKBackingImageBackupCreate_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProxyEngineServiceServer).SPDKBackingImageBackupCreate(ctx, req.(*SPDKBackingImageBackupCreateRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ProxyEngineService_SPDKBackingImageBackupStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SPDKBackingImageBackupStatusRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProxyEngineServiceServer).SPDKBackingImageBackupStatus(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ProxyEngineService_SPDKBackingImageBackupStatus_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProxyEngineServiceServer).SPDKBackingImageBackupStatus(ctx, req.(*SPDKBackingImageBackupStatusRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _ProxyEngineService_MetricsGet_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ProxyEngineRequest)
 	if err := dec(in); err != nil {
@@ -1449,6 +1515,14 @@ var ProxyEngineService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SPDKBackingImageList",
 			Handler:    _ProxyEngineService_SPDKBackingImageList_Handler,
+		},
+		{
+			MethodName: "SPDKBackingImageBackupCreate",
+			Handler:    _ProxyEngineService_SPDKBackingImageBackupCreate_Handler,
+		},
+		{
+			MethodName: "SPDKBackingImageBackupStatus",
+			Handler:    _ProxyEngineService_SPDKBackingImageBackupStatus_Handler,
 		},
 		{
 			MethodName: "MetricsGet",
